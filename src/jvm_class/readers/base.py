@@ -38,7 +38,7 @@ def base_readers():
     return locals()
 
 
-def read(file):
+def class_file(file):
     methods = base_readers()
     file = bound_methods(file, methods)
     return file
