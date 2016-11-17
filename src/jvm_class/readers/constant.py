@@ -1,7 +1,6 @@
 import sys
 
 from enum import Enum
-from collections import namedtuple
 
 
 def read_constant_pool(file):
@@ -16,10 +15,12 @@ def read_constant_pool(file):
         pool[index] = constant
         index += constant_size
 
+    pool = make_cache(pool)
+
     return pool
 
 
-def read_constant(file, pool):
+def read_constant(file):
     tag = file.read_unit8()
     tag = int.from_bytes(tag, byteorder=sys.byteorder, signed=True)
 
@@ -38,15 +39,44 @@ def read_constant(file, pool):
         Tags.InvokeDynamic: get_invoke_dynamic,
     }
 
-    ReadNeedPool = (Tags.Class, Tags.String, Tags.Fieldref, Tags.NameAndType)
     LargeSizeType = (Tags.Long, Tags.Double)
 
     read = ConstantMap.get(tag)
 
     if read:
-        constant = read(file, pool) if tag in ReadNeedPool else read(file)
+        constant = read(file)
+        constant['tag'] = tag
         size = 2 if tag in LargeSizeType else 1
         return constant, size
+    else:
+        raise
+
+
+def make_cache(pool):
+    for index, constant in pool.items():
+        pool[index] = make_constant_cache(constant, pool)
+    return pool
+
+
+def make_constant_cache(constant, pool):
+    if constant['tag'] == Tags.String:
+        constant['value'] = get_utf8_from_pool(pool, constant['index'])
+        return constant
+    elif constant['tag'] in (Tags.Class, Tags.Fieldref, Tags.NameAndType):
+        index_suffix = '_index'
+        for key, value in constant.items():
+            if key.endswith(index_suffix):
+                name = key[:-len(index_suffix)]
+                constant[name] = get_utf8_from_pool(pool, value)
+        return constant
+    else:
+        return constant
+
+
+def get_utf8_from_pool(pool, index):
+    constant_utf8 = pool[index]
+    if constant_utf8:
+        return constant_utf8['value']
     else:
         raise
 
@@ -66,122 +96,78 @@ class Tags(Enum):
     InvokeDynamic = 18
 
 
-Interger = namedtuple('Interger', ['value'])
-Float = namedtuple('Float', ['value'])
-Long = namedtuple('Long', ['value'])
-Double = namedtuple('Double', ['value'])
-UTF8 = namedtuple('UTF8', ['value'])
-String = namedtuple('String', ['index', 'value'])
-Class = namedtuple('Class', ['name_index', 'name'])
-NameAndType = namedtuple('NameAndType', ['name_index', 'name',
-                                         'descriptor_index', 'descriptor'])
-Fieldref = namedtuple('Fieldref', ['class_index', 'class_name',
-                                   'name_and_type_index', 'name_and_type'])
-Methodref = namedtuple('Methodref', ['class_index', 'class_name',
-                                     'name_and_type_index', 'name_and_type'])
-InterfaceMethodref = namedtuple('InterfaceMethodref', ['class_index',
-                                                       'class_name',
-                                                       'name_and_type_index',
-                                                       'name_and_type'])
-
-
 def get_interger(file):
     value = file.read_unit32()
     value = int.from_bytes(value, byteorder=sys.byteorder, signed=True)
-    return Interger(value=value)
+    return {'value': value}
 
 
 def get_float(file):
     value = file.read_unit32()
     value = float.fromhex(value)
-    return Float(value=value)
+    return {'value': value}
 
 
 def get_long(file):
     value = file.read_unit64()
     value = int.from_bytes(value, byteorder=sys.byteorder, signed=True)
-    return Long(value=value)
+    return {'value': value}
 
 
 def get_double(file):
     value = file.read_unit64()
     value = float.fromhex(value)
-    return Double(value=value)
+    return {'value': value}
 
 
 def get_utf8(file):
     length = file.read_unit16()
     value = file.read(length)
     value = value.decode('utf-8')
-    return UTF8(value=value)
+    return {'value': value}
 
 
-def get_string(file, pool):
+def get_string(file):
     index = file.read_unit16()
-
-    value = pool.get_utf8(index)
-
-    return String(index=index, value=value)
+    return {'index': index}
 
 
-def get_class(file, pool):
+def get_class(file):
     name_index = file.read_unit16()
-
-    name = pool.get_utf8(name_index)
-
-    return Class(name_index=name_index, name=name)
+    return {'name_index': name_index}
 
 
-def get_name_and_type(file, pool):
+def get_name_and_type(file):
     name_index = file.read_unit16()
     descriptor_index = file.read_unit16()
-
-    name = pool.get_utf8(name_index)
-    descriptor = pool.get_utf8(descriptor_index)
-
-    return NameAndType(name_index=name_index,
-                       name=name,
-                       descriptor_index=descriptor_index,
-                       descriptor=descriptor)
+    return {'name_index': name_index, 'descriptor_index': descriptor_index}
 
 
-def get_fieldref(file, pool):
+def get_fieldref(file):
     class_index = file.read_unit16()
     name_and_type_index = file.read_unit16()
-
-    class_name = pool.get_class_name(class_index)
-    name_and_type = pool.get_name_and_type(name_and_type_index)
-
-    return Fieldref(class_index=class_index,
-                    class_name=class_name,
-                    name_and_type_index=name_and_type_index,
-                    name_and_type=name_and_type)
+    return {
+        'class_index': class_index,
+        'name_and_type_index': name_and_type_index
+    }
 
 
-def get_methodref(file, pool):
+def get_methodref(file):
     class_index = file.read_unit16()
     name_and_type_index = file.read_unit16()
-
-    class_name = pool.get_class_name(class_index)
-    name_and_type = pool.get_name_and_type(name_and_type_index)
-
-    return Methodref(class_index=class_index,
-                     class_name=class_name,
-                     name_and_type_index=name_and_type_index,
-                     name_and_type=name_and_type)
+    return {
+        'class_index': class_index,
+        'name_and_type_index': name_and_type_index
+    }
 
 
-def get_interface_methodref(file, pool):
+def get_interface_methodref(file):
     class_index = file.read_unit16()
     name_and_type_index = file.read_unit16()
-
-    class_name = pool.get_class_name(class_index)
-    name_and_type = pool.get_name_and_type(name_and_type_index)
-
-    return InterfaceMethodref(class_index=class_index,
-                              class_name=class_name,
-                              name_and_type_index=name_and_type_index,
-                              name_and_type=name_and_type)
+    return {
+        'class_index': class_index,
+        'name_and_type_index': name_and_type_index
+    }
 
 
 def get_method_handle(file):
