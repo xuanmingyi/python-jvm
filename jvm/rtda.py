@@ -136,3 +136,9 @@ class OperandStack(Stack):
 
     def pop_ref(self):
         return self.pop()
+
+    def push_slot(self, value):
+        return self.push(value)
+
+    def pop_slot(self):
+        return self.pop()
