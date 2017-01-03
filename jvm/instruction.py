@@ -183,3 +183,267 @@ def DUP2_X1(frame, code):
 
 def DUP2_X2(frame, code):
     pass
+
+
+# swap instuctions
+
+def SWAP(frame, code):
+    slot1 = frame.operand_stack.pop_solt()
+    slot2 = frame.operand_stack.pop_solt()
+    frame.operand_stack.push_solt(slot1)
+    frame.operand_stack.push_solt(slot2)
+
+
+# math instuctions
+
+def ADD(frame, code):
+    value1 = frame.operand_stack.pop_int()
+    value2 = frame.operand_stack.pop_int()
+    result = value1 + value2
+    frame.operand_stack.push_int(result)
+
+
+def SUB(frame, code):
+    value1 = frame.operand_stack.pop_int()
+    value2 = frame.operand_stack.pop_int()
+    result = value1 - value2
+    frame.operand_stack.push_int(result)
+
+
+def MUL(frame, code):
+    value1 = frame.operand_stack.pop_int()
+    value2 = frame.operand_stack.pop_int()
+    result = value1 * value2
+    frame.operand_stack.push_int(result)
+
+
+def DIV(frame, code):
+    value1 = frame.operand_stack.pop_int()
+    value2 = frame.operand_stack.pop_int()
+    if value2 == 0:
+        raise Exception("ArithmeticException by zore")
+    else:
+        result = value1 - value2
+        frame.operand_stack.push_int(result)
+
+
+def NEG(frame, code):
+    value = frame.operand_stack.pop_int()
+    result = -value
+    frame.operand_stack.push_int(result)
+
+
+def IREM(frame, code):
+    value1 = frame.operand_stack.pop_int()
+    value2 = frame.operand_stack.pop_int()
+    if value2 == 0:
+        raise Exception("ArithmeticException by zore")
+    else:
+        result = value1 % value2
+        frame.operand_stack.push_int(result)
+
+
+def DREM(frame, code):
+    value1 = frame.operand_stack.pop_double()
+    value2 = frame.operand_stack.pop_double()
+    if value2 == 0:
+        raise Exception("ArithmeticException by zore")
+    else:
+        result = value1 % value2
+        frame.operand_stack.pop_double(result)
+
+
+# sh instuctions
+
+def ISHL(frame, code):
+    offset = frame.operand_stack.pop_int()
+    value = frame.operand_stack.pop_int()
+    offset = offset & 0x1f
+    result = value << offset
+    frame.operand_stack.push_int(result)
+
+
+def ISHR(frame, code):
+    offset = frame.operand_stack.pop_int()
+    value = frame.operand_stack.pop_int()
+    offset = offset & 0x1f
+    result = value >> offset
+    frame.operand_stack.push_int(result)
+
+
+def IUSHR(frame, code):
+    offset = frame.operand_stack.pop_int()
+    value = frame.operand_stack.pop_int()
+    offset = offset & 0x1f
+    result = value >> offset
+    frame.operand_stack.push_int(result)
+
+
+def LSHL(frame, code):
+    offset = frame.operand_stack.pop_int()
+    value = frame.operand_stack.pop_int()
+    offset = offset & 0x3f
+    result = value << offset
+    frame.operand_stack.push_int(result)
+
+
+def LSHR(frame, code):
+    offset = frame.operand_stack.pop_int()
+    value = frame.operand_stack.pop_int()
+    offset = offset & 0x3f
+    result = value >> offset
+    frame.operand_stack.push_int(result)
+
+
+def LUSHR(frame, code):
+    offset = frame.operand_stack.pop_int()
+    value = frame.operand_stack.pop_int()
+    offset = offset & 0x3f
+    result = value >> offset
+    frame.operand_stack.push_int(result)
+
+
+# and instuctions
+
+def IAND(frame, code):
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    result = value1 & value2
+    frame.operand_stack.push_int(result)
+
+
+def LAND(frame, code):
+    value2 = frame.operand_stack.pop_long()
+    value1 = frame.operand_stack.pop_long()
+    result = value1 & value2
+    frame.operand_stack.push_long(result)
+
+
+def IOR(frame, code):
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    result = value1 | value2
+    frame.operand_stack.push_int(result)
+
+
+def LOR(frame, code):
+    value2 = frame.operand_stack.pop_long()
+    value1 = frame.operand_stack.pop_long()
+    result = value1 | value2
+    frame.operand_stack.push_long(result)
+
+
+def IXOR(frame, code):
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    result = value1 ^ value2
+    frame.operand_stack.push_int(result)
+
+
+def LXOR(frame, code):
+    value2 = frame.operand_stack.pop_long()
+    value1 = frame.operand_stack.pop_long()
+    result = value1 ^ value2
+    frame.operand_stack.push_long(result)
+
+
+# iinc instuctions
+
+def IINC(frame, code):
+    index = base.read_int8(code)
+    const = base.read_interger8(code)
+    value = frame.local_vars.get_int(index)
+    value += const
+    frame.local_vars.set_int(index, value)
+
+
+# d2x instuctions
+
+def D2F(frame, code):
+    value = frame.operand_stack.pop_double()
+    result = float(value)
+    frame.operand_stack.push_float(result)
+
+
+def D2I(frame, code):
+    value = frame.operand_stack.pop_double()
+    result = int(value)
+    frame.operand_stack.push_int(result)
+
+
+def D2L(frame, code):
+    value = frame.operand_stack.pop_double()
+    result = int(value)
+    frame.operand_stack.push_long(result)
+
+
+# lcmp instuctions
+
+def LCMP(frame, code):
+    value2 = frame.operand_stack.pop_long()
+    value1 = frame.operand_stack.pop_long()
+    if value1 > value2:
+        frame.operand_stack.push_int(1)
+    elif value1 == value2:
+        frame.operand_stack.push_int(0)
+    else:
+        frame.operand_stack.push_int(-1)
+
+
+# fcmp<op> and dcmp<op> instuctions
+######### for the following 4
+######### what should NaN be
+
+def FCMPG(frame, code):
+    value2 = frame.operand_stack.pop_float()
+    value1 = frame.operand_stack.pop_float()
+    if value1 > value2:
+        frame.operand_stack.push_int(1)
+    elif value1 == value2:
+        frame.operand_stack.push_int(0)
+    elif value1 < value2:
+        frame.operand_stack.push_int(-1)
+    else:
+        frame.operand_stack.push_int(1)
+
+
+def FCMPL(frame, code):
+    value2 = frame.operand_stack.pop_float()
+    value1 = frame.operand_stack.pop_float()
+    if value1 > value2:
+        frame.operand_stack.push_int(1)
+    elif value1 == value2:
+        frame.operand_stack.push_int(0)
+    elif value1 < value2:
+        frame.operand_stack.push_int(-1)
+    else:
+        frame.operand_stack.push_int(-1)
+
+
+def DCMPG(frame, code):
+    value2 = frame.operand_stack.pop_double()
+    value1 = frame.operand_stack.pop_double()
+    if value1 > value2:
+        frame.operand_stack.push_int(1)
+    elif value1 == value2:
+        frame.operand_stack.push_int(0)
+    elif value1 < value2:
+        frame.operand_stack.push_int(-1)
+    else:
+        frame.operand_stack.push_int(1)
+
+
+def DCMPL(frame, code):
+    value2 = frame.operand_stack.pop_double()
+    value1 = frame.operand_stack.pop_double()
+    if value1 > value2:
+        frame.operand_stack.push_int(1)
+    elif value1 == value2:
+        frame.operand_stack.push_int(0)
+    elif value1 < value2:
+        frame.operand_stack.push_int(-1)
+    else:
+        frame.operand_stack.push_int(-1)
+
+
+# if<cond> instuctions

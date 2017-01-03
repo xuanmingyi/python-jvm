@@ -58,6 +58,11 @@ def read_int64(file):
     return utils.bytes_to_int(bytes)
 
 
+def read_interger8(file):
+    bytes = read_unit8(file)
+    return utils.bytes_to_int(bytes, signed=True)
+
+
 def read_interger(file):
     bytes = read_unit32(file)
     return utils.bytes_to_int(bytes, signed=True)
