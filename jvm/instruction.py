@@ -1,4 +1,5 @@
 from jvm.readers import base
+from . import logic
 
 
 class codeReader(object):
@@ -447,3 +448,119 @@ def DCMPL(frame, code):
 
 
 # if<cond> instuctions
+
+def IFEQ(frame, code):
+    offset = base.read_int8(code)
+    value = frame.operand_stack.pop_int()
+    if value == 0:
+        logic.branch(frame, offset)
+
+
+def IFNE(frame, code):
+    offset = base.read_int8(code)
+    value = frame.operand_stack.pop_int()
+    if value != 0:
+        logic.branch(frame, offset)
+
+
+def IFLT(frame, code):
+    offset = base.read_int8(code)
+    value = frame.operand_stack.pop_int()
+    if value < 0:
+        logic.branch(frame, offset)
+
+
+def IFLE(frame, code):
+    offset = base.read_int8(code)
+    value = frame.operand_stack.pop_int()
+    if value <= 0:
+        logic.branch(frame, offset)
+
+
+def IFGT(frame, code):
+    offset = base.read_int8(code)
+    value = frame.operand_stack.pop_int()
+    if value > 0:
+        logic.branch(frame, offset)
+
+
+def IFGE(frame, code):
+    offset = base.read_int8(code)
+    value = frame.operand_stack.pop_int()
+    if value >= 0:
+        logic.branch(frame, offset)
+
+
+# if_imcp<cond> instuctions
+
+def IF_ICMPEQ(frame, code):
+    offset = base.read_int8(code)
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    if value1 == value2:
+        logic.branch(frame, offset)
+
+
+def IF_ICMPNE(frame, code):
+    offset = base.read_int8(code)
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    if value1 != value2:
+        logic.branch(frame, offset)
+
+
+def IF_ICMPLT(frame, code):
+    offset = base.read_int8(code)
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    if value1 < value2:
+        logic.branch(frame, offset)
+
+
+def IF_ICMPLE(frame, code):
+    offset = base.read_int8(code)
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    if value1 <= value2:
+        logic.branch(frame, offset)
+
+
+def IF_ICMPGT(frame, code):
+    offset = base.read_int8(code)
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    if value1 > value2:
+        logic.branch(frame, offset)
+
+
+def IF_ICMPGE(frame, code):
+    offset = base.read_int8(code)
+    value2 = frame.operand_stack.pop_int()
+    value1 = frame.operand_stack.pop_int()
+    if value1 >= value2:
+        logic.branch(frame, offset)
+
+
+# if_amcp<cond> instuctions
+
+def IF_ACMPEQ(frame, code):
+    offset = base.read_int8(code)
+    ref2 = frame.operand_stack.pop_ref()
+    ref1 = frame.operand_stack.pop_ref()
+    if ref1 == ref2:
+        logic.branch(frame, offset)
+
+
+def IF_ACMPNE(frame, code):
+    offset = base.read_int8(code)
+    ref2 = frame.operand_stack.pop_ref()
+    ref1 = frame.operand_stack.pop_ref()
+    if ref1 != ref2:
+        logic.branch(frame, offset)
+
+
+# goto instuction
+
+def GOTO(frame, code):
+    offset = base.read_int8(code)
+    logic.branch(frame, offset)

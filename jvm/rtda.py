@@ -13,6 +13,10 @@ class Thread(object):
     def current_frame(self):
         return self.stack.top
 
+    @property
+    def pc(self):
+        pass
+
 
 class Stack(object):
     def __init__(self, max_size):
@@ -48,6 +52,10 @@ class Frame(object):
     def __init__(self, max_locals, max_stack):
         self.local_vars = LocalVars(max_locals)
         self.operand_stack = OperandStack(max_stack)
+
+    @property
+    def thread(self):
+        pass
 
 
 class Slot(object):
